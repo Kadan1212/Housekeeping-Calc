@@ -1,1 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housekeeper Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+            font-size: 24px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result-label {
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .result-value {
+            font-size: 32px;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Housekeeper Calculator</h1>
+        
+        <div class="input-group">
+            <label for="tidies">Tidies (t):</label>
+            <input type="text" id="tidies" placeholder="Enter tidies and press Enter">
+        </div>
+        
+        <div class="input-group">
+            <label for="fullCleans">Full Cleans (c):</label>
+            <input type="text" id="fullCleans" placeholder="Enter full cleans and press Enter" disabled>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-label">Housekeepers (h):</div>
+            <div class="result-value" id="resultValue">0</div>
+        </div>
+    </div>
 
+    <script>
+        const tidiesInput = document.getElementById('tidies');
+        const fullCleansInput = document.getElementById('fullCleans');
+        const resultDiv = document.getElementById('result');
+        const resultValue = document.getElementById('resultValue');
+        
+        let t = null;
+        let c = null;
+        
+        // Reset function
+        function reset() {
+            t = null;
+            c = null;
+            tidiesInput.value = '';
+            fullCleansInput.value = '';
+            tidiesInput.disabled = false;
+            fullCleansInput.disabled = true;
+            resultDiv.classList.remove('show');
+        }
+        
+        // Only allow numbers
+        function validateInput(e) {
+            const value = e.target.value;
+            e.target.value = value.replace(/[^0-9.]/g, '');
+        }
+        
+        tidiesInput.addEventListener('input', validateInput);
+        fullCleansInput.addEventListener('input', validateInput);
+        
+        // Detect any keypress and reset if result is showing
+        document.addEventListener('keydown', function(e) {
+            // Check if a number key is pressed and result is showing
+            if (resultDiv.classList.contains('show') && /^[0-9]$/.test(e.key)) {
+                reset();
+                tidiesInput.value = e.key;
+                tidiesInput.focus();
+                e.preventDefault();
+            }
+        });
+        
+        // Reset function
+        function reset() {
+            t = null;
+            c = null;
+            tidiesInput.value = '';
+            fullCleansInput.value = '';
+            tidiesInput.disabled = false;
+            fullCleansInput.disabled = true;
+            resultDiv.classList.remove('show');
+            tidiesInput.focus();
+        }
+        
+        // Handle tidies input
+        tidiesInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    t = value;
+                    this.disabled = true;
+                    fullCleansInput.disabled = false;
+                    fullCleansInput.focus();
+                }
+            }
+        });
+        
+        // Reset when typing in tidies after calculation is done
+        tidiesInput.addEventListener('input', function() {
+            if (resultDiv.classList.contains('show')) {
+                reset();
+            }
+        });
+        
+        // Handle full cleans input
+        fullCleansInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const value = parseFloat(this.value);
+                if (!isNaN(value) && t !== null) {
+                    c = value;
+                    calculateHousekeepers();
+                }
+            }
+        });
+        
+        function calculateHousekeepers() {
+            // h = (t + (c/3)) / 8, rounded up
+            const h = Math.ceil((t + (c / 3)) / 8);
+            resultValue.textContent = h;
+            resultDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>
