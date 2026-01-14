@@ -72,12 +72,12 @@
         
         <div class="input-group">
             <label for="tidies">Tidies (t):</label>
-            <input type="text" id="tidies" placeholder="Enter tidies and press Enter">
+            <input type="text" id="tidies" placeholder="Enter tidies">
         </div>
         
         <div class="input-group">
             <label for="fullCleans">Full Cleans (c):</label>
-            <input type="text" id="fullCleans" placeholder="Enter full cleans and press Enter" disabled>
+            <input type="text" id="fullCleans" placeholder="Enter full cleans" disabled>
         </div>
         
         <div class="result" id="result">
@@ -88,74 +88,133 @@
 
     <script>
         const tidiesInput = document.getElementById('tidies');
-const fullCleansInput = document.getElementById('fullCleans');
-const resultDiv = document.getElementById('result');
-const resultValue = document.getElementById('resultValue');
-
-let t = null;
-let c = null;
-
-// Reset the entire form
-function reset() {
-    t = null;
-    c = null;
-    tidiesInput.value = '';
-    fullCleansInput.value = '';
-    tidiesInput.disabled = false;
-    fullCleansInput.disabled = true;
-    resultDiv.classList.remove('show');
-    tidiesInput.focus();
-}
-
-// Logic for handling the first input (Tidies)
-function processTidies() {
-    const val = parseFloat(tidiesInput.value);
-    if (!isNaN(val)) {
-        t = val;
-        tidiesInput.disabled = true;
-        fullCleansInput.disabled = false;
-        fullCleansInput.focus();
-    }
-}
-
-// Logic for handling the second input (Full Cleans)
-function processFullCleans() {
-    const val = parseFloat(fullCleansInput.value);
-    if (!isNaN(val) && t !== null) {
-        c = val;
-        const h = Math.ceil((c + (t / 3)) / 8);
-        resultValue.textContent = h;
-        resultDiv.classList.add('show');
-    }
-}
-
-// Input event for Tidies: Clean numbers and auto-advance at 2 digits
-tidiesInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-    if (e.target.value.length >= 2) processTidies();
-});
-
-// Input event for Full Cleans: Clean numbers
-fullCleansInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-    if (e.target.value.length >= 2) processFullCleans();
-});
-
-// Keypress events for "Enter" key
-tidiesInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') processTidies();
-});
-
-fullCleansInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') processFullCleans();
-});
-
-// Global reset: If result is showing, any number key resets and starts over
-document.addEventListener('keydown', (e) => {
-    if (resultDiv.classList.contains('show') && /^[0-9]$/.test(e.key)) {
-        reset();
-    }
-});
+        const fullCleansInput = document.getElementById('fullCleans');
+        const resultDiv = document.getElementById('result');
+        const resultValue = document.getElementById('resultValue');
+        
+        let t = null;
+        let c = null;
+        let tidiesEntered = false;
+        let fullCleansTimeout = null;
+        
+        // Only allow numbers
+        function validateInput(e) {
+            const value = e.target.value;
+            e.target.value = value.replace(/[^0-9.]/g, '');
+        }
+        
+        // Reset function
+        function reset() {
+            t = null;
+            c = null;
+            tidiesEntered = false;
+            tidiesInput.value = '';
+            fullCleansInput.value = '';
+            tidiesInput.disabled = false;
+            fullCleansInput.disabled = true;
+            resultDiv.classList.remove('show');
+        }
+        
+        // Calculate result
+        function calculateHousekeepers() {
+            const h = Math.ceil((c + (t / 3)) / 8);
+            resultValue.textContent = h;
+            resultDiv.classList.add('show');
+        }
+        
+        // Detect number key and reset if result is showing
+        document.addEventListener('keydown', function(e) {
+            if (resultDiv.classList.contains('show') && /^[0-9]$/.test(e.key)) {
+                reset();
+                tidiesInput.value = e.key;
+                tidiesInput.focus();
+                e.preventDefault();
+            }
+            // Press 't' to edit tidies value
+            if (tidiesEntered && e.key.toLowerCase() === 't') {
+                tidiesEntered = false;
+                tidiesInput.disabled = false;
+                fullCleansInput.disabled = true;
+                fullCleansInput.value = '';
+                resultDiv.classList.remove('show');
+                tidiesInput.focus();
+                tidiesInput.setSelectionRange(tidiesInput.value.length, tidiesInput.value.length);
+                e.preventDefault();
+            }
+        });
+        
+        // Handle tidies input - auto-submit after 2 digits
+        tidiesInput.addEventListener('input', function() {
+            validateInput({ target: this });
+            if (!tidiesEntered && this.value.length >= 2) {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    t = value;
+                    tidiesEntered = true;
+                    this.disabled = true;
+                    fullCleansInput.disabled = false;
+                    fullCleansInput.focus();
+                }
+            }
+        });
+        
+        tidiesInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.length > 0) {
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    t = value;
+                    tidiesEntered = true;
+                    this.disabled = true;
+                    fullCleansInput.disabled = false;
+                    fullCleansInput.focus();
+                }
+            }
+        });
+        
+        // Handle full cleans input - auto-submit after 3 digits, 0.5sec delay, or Enter
+        fullCleansInput.addEventListener('input', function() {
+            validateInput({ target: this });
+            if (this.value.length > 0 && tidiesEntered) {
+                // Auto-submit immediately if 3 digits
+                if (this.value.length >= 3) {
+                    if (fullCleansTimeout) {
+                        clearTimeout(fullCleansTimeout);
+                    }
+                    const value = parseFloat(this.value);
+                    if (!isNaN(value)) {
+                        c = value;
+                        calculateHousekeepers();
+                    }
+                } else {
+                    // Clear existing timeout
+                    if (fullCleansTimeout) {
+                        clearTimeout(fullCleansTimeout);
+                    }
+                    // Set new timeout for 0.5 seconds
+                    fullCleansTimeout = setTimeout(() => {
+                        const value = parseFloat(this.value);
+                        if (!isNaN(value)) {
+                            c = value;
+                            calculateHousekeepers();
+                        }
+                    }, 500);
+                }
+            }
+        });
+        
+        fullCleansInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.length > 0 && tidiesEntered) {
+                // Clear timeout and calculate immediately
+                if (fullCleansTimeout) {
+                    clearTimeout(fullCleansTimeout);
+                }
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    c = value;
+                    calculateHousekeepers();
+                }
+            }
+        });
     </script>
 </body>
 </html>
