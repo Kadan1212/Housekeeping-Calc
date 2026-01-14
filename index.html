@@ -138,6 +138,7 @@ tidiesInput.addEventListener('input', (e) => {
 // Input event for Full Cleans: Clean numbers
 fullCleansInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+    if (e.target.value.length >= 2) processFullCleans();
 });
 
 // Keypress events for "Enter" key
