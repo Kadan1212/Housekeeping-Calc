@@ -94,6 +94,7 @@
         
         let t = null;
         let c = null;
+        let digits = 0
         
         // Reset function
         function reset() {
@@ -104,6 +105,8 @@
             tidiesInput.disabled = false;
             fullCleansInput.disabled = true;
             resultDiv.classList.remove('show');
+            let tdigits = 0
+            let cdigits = 0
         }
         
         // Only allow numbers
@@ -123,6 +126,7 @@
                 tidiesInput.value = e.key;
                 tidiesInput.focus();
                 e.preventDefault();
+                digits = digits + 1
             }
         });
         
@@ -140,13 +144,14 @@
         
         // Handle tidies input
         tidiesInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' or digits === 2) {
                 const value = parseFloat(this.value);
                 if (!isNaN(value)) {
                     t = value;
                     this.disabled = true;
                     fullCleansInput.disabled = false;
                     fullCleansInput.focus();
+                    digits = 0
                 }
             }
         });
