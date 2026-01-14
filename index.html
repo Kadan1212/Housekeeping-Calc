@@ -170,8 +170,8 @@
         });
         
         function calculateHousekeepers() {
-            // h = (t + (c/3)) / 8, rounded up
-            const h = Math.ceil((t + (c / 3)) / 8);
+            // h = (c + (t/3)) / 8, rounded up
+            const h = Math.ceil((c + (t / 3)) / 8);
             resultValue.textContent = h;
             resultDiv.classList.add('show');
         }
