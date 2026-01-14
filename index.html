@@ -111,6 +111,7 @@
         function validateInput(e) {
             const value = e.target.value;
             e.target.value = value.replace(/[^0-9.]/g, '');
+            digits = digits + 1;
         }
         
         tidiesInput.addEventListener('input', validateInput);
@@ -124,7 +125,6 @@
                 tidiesInput.value = e.key;
                 tidiesInput.focus();
                 e.preventDefault();
-                digits = digits + 1
             }
         });
         
@@ -142,14 +142,14 @@
         
         // Handle tidies input
         tidiesInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' or digits === 2) {
+            if (e.key === 'Enter' or digits == 2) {
                 const value = parseFloat(this.value);
                 if (!isNaN(value)) {
                     t = value;
                     this.disabled = true;
                     fullCleansInput.disabled = false;
                     fullCleansInput.focus();
-                    digits = 0
+                    digits = 0;
                 }
             }
         });
@@ -163,10 +163,11 @@
         
         // Handle full cleans input
         fullCleansInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' or digits == 0) {
                 const value = parseFloat(this.value);
                 if (!isNaN(value) && t !== null) {
                     c = value;
+                    digits = 0;
                     calculateHousekeepers();
                 }
             }
