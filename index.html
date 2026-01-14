@@ -1,220 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Housekeeper Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: black;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin-top: 0;
-            color: #333;
-            font-size: 24px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e8f5e9;
-            border-radius: 4px;
-            display: none;
-        }
-        .result.show {
-            display: block;
-        }
-        .result-label {
-            color: #666;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .result-value {
-            font-size: 32px;
-            color: #2e7d32;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Housekeeper Calculator</h1>
-        
-        <div class="input-group">
-            <label for="tidies">Tidies (t):</label>
-            <input type="text" id="tidies" placeholder="Enter tidies">
-        </div>
-        
-        <div class="input-group">
-            <label for="fullCleans">Full Cleans (c):</label>
-            <input type="text" id="fullCleans" placeholder="Enter full cleans" disabled>
-        </div>
-        
-        <div class="result" id="result">
-            <div class="result-label">Housekeepers (h):</div>
-            <div class="result-value" id="resultValue">0</div>
-        </div>
-    </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Housekeeper Calculator</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+max-width: 400px;
+margin: 50px auto;
+padding: 20px;
+background-color: #000000;
+}
+.container {
+background: #000000;
+padding: 30px;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0,255,0,0.3);
+border: 2px solid #00ff00;
+}
+h1 {
+margin-top: 0;
+color: #ffffff;
+font-size: 24px;
+}
+.input-group {
+margin-bottom: 20px;
+}
+label {
+display: block;
+margin-bottom: 5px;
+color: #ffffff;
+font-weight: bold;
+}
+input {
+width: 100%;
+padding: 10px;
+font-size: 16px;
+border: 2px solid #00ff00;
+border-radius: 4px;
+box-sizing: border-box;
+background-color: #000000;
+color: #ffffff;
+}
+input:focus {
+outline: none;
+border-color: #00ff00;
+box-shadow: 0 0 5px #00ff00;
+}
+input:disabled {
+opacity: 0.5;
+}
+.result {
+margin-top: 20px;
+padding: 15px;
+background-color: #000000;
+border: 2px solid #00ff00;
+border-radius: 4px;
+display: none;
+}
+.result.show {
+display: block;
+}
+.result-label {
+color: #ffffff;
+font-weight: bold;
+margin-bottom: 5px;
+}
+.result-value {
+font-size: 32px;
+color: #00ff00;
+let fullCleansTimeout = null;
+// Press 't' to edit tidies value
+if (tidiesEntered && e.key.toLowerCase() === 't') {
+tidiesEntered = false;
+tidiesInput.disabled = false;
+fullCleansInput.disabled = true;
+fullCleansInput.value = '';
+resultDiv.classList.remove('show');
+tidiesInput.focus();
+tidiesInput.setSelectionRange(tidiesInput.value.length, tidiesInput.value.length);
+e.preventDefault();
+}
+});
 
-    <script>
-        const tidiesInput = document.getElementById('tidies');
-        const fullCleansInput = document.getElementById('fullCleans');
-        const resultDiv = document.getElementById('result');
-        const resultValue = document.getElementById('resultValue');
-        
-        let t = null;
-        let c = null;
-        let tidiesEntered = false;
-        let fullCleansTimeout = null;
-        
-        // Only allow numbers
-        function validateInput(e) {
-            const value = e.target.value;
-            e.target.value = value.replace(/[^0-9.]/g, '');
-        }
-        
-        // Reset function
-        function reset() {
-            t = null;
-            c = null;
-            tidiesEntered = false;
-            tidiesInput.value = '';
-            fullCleansInput.value = '';
-            tidiesInput.disabled = false;
-            fullCleansInput.disabled = true;
-            resultDiv.classList.remove('show');
-        }
-        
-        // Calculate result
-        function calculateHousekeepers() {
-            const h = Math.ceil((c + (t / 3)) / 8);
-            resultValue.textContent = h;
-            resultDiv.classList.add('show');
-        }
-        
-        // Detect number key and reset if result is showing
-        document.addEventListener('keydown', function(e) {
-            if (resultDiv.classList.contains('show') && /^[0-9]$/.test(e.key)) {
-                reset();
-                tidiesInput.value = e.key;
-                tidiesInput.focus();
-                e.preventDefault();
-            }
-            // Press 't' to edit tidies value
-            if (tidiesEntered && e.key.toLowerCase() === 't') {
-                tidiesEntered = false;
-                tidiesInput.disabled = false;
-                fullCleansInput.disabled = true;
-                fullCleansInput.value = '';
-                resultDiv.classList.remove('show');
-                tidiesInput.focus();
-                tidiesInput.setSelectionRange(tidiesInput.value.length, tidiesInput.value.length);
-                e.preventDefault();
-            }
-        });
-        
-        // Handle tidies input - auto-submit after 2 digits
-        tidiesInput.addEventListener('input', function() {
-            validateInput({ target: this });
-            if (!tidiesEntered && this.value.length >= 2) {
-                const value = parseFloat(this.value);
-                if (!isNaN(value)) {
-                    t = value;
-                    tidiesEntered = true;
-                    this.disabled = true;
-                    fullCleansInput.disabled = false;
-                    fullCleansInput.focus();
-                }
-            }
-        });
-        
-        tidiesInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && this.value.length > 0) {
-                const value = parseFloat(this.value);
-                if (!isNaN(value)) {
-                    t = value;
-                    tidiesEntered = true;
-                    this.disabled = true;
-                    fullCleansInput.disabled = false;
-                    fullCleansInput.focus();
-                }
-            }
-        });
-        
-        // Handle full cleans input - auto-submit after 3 digits, 0.5sec delay, or Enter
-        fullCleansInput.addEventListener('input', function() {
-            validateInput({ target: this });
-            if (this.value.length > 0 && tidiesEntered) {
-                // Auto-submit immediately if 3 digits
-                if (this.value.length >= 3) {
-                    if (fullCleansTimeout) {
-                        clearTimeout(fullCleansTimeout);
-                    }
-                    const value = parseFloat(this.value);
-                    if (!isNaN(value)) {
-                        c = value;
-                        calculateHousekeepers();
-                    }
-                } else {
-                    // Clear existing timeout
-                    if (fullCleansTimeout) {
-                        clearTimeout(fullCleansTimeout);
-                    }
-                    // Set new timeout for 0.5 seconds
-                    fullCleansTimeout = setTimeout(() => {
-                        const value = parseFloat(this.value);
-                        if (!isNaN(value)) {
-                            c = value;
-                            calculateHousekeepers();
-                        }
-                    }, 500);
-                }
-            }
-        });
-        
-        fullCleansInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && this.value.length > 0 && tidiesEntered) {
-                // Clear timeout and calculate immediately
-                if (fullCleansTimeout) {
-                    clearTimeout(fullCleansTimeout);
-                }
-                const value = parseFloat(this.value);
-                if (!isNaN(value)) {
-                    c = value;
-                    calculateHousekeepers();
-                }
-            }
-        });
-    </script>
+// Handle tidies input - auto-submit after 2 digits
+tidiesInput.addEventListener('input', function() {
+validateInput({ target: this });
+if (!tidiesEntered && this.value.length >= 2) {
+const value = parseFloat(this.value);
+if (!isNaN(value)) {
+t = value;
+tidiesEntered = true;
+this.disabled = true;
+fullCleansInput.disabled = false;
+fullCleansInput.focus();
+}
+}
+});
+
+tidiesInput.addEventListener('keypress', function(e) {
+if (e.key === 'Enter' && this.value.length > 0) {
+const value = parseFloat(this.value);
+if (!isNaN(value)) {
+t = value;
+tidiesEntered = true;
+this.disabled = true;
+fullCleansInput.disabled = false;
+fullCleansInput.focus();
+}
+}
+});
+
+// Handle full cleans input - auto-submit after 3 digits, 0.5sec delay, or Enter
+fullCleansInput.addEventListener('input', function() {
+validateInput({ target: this });
+if (this.value.length > 0 && tidiesEntered) {
+// Auto-submit immediately if 3 digits
+if (this.value.length >= 3) {
+if (fullCleansTimeout) {
+clearTimeout(fullCleansTimeout);
+}
+const value = parseFloat(this.value);
+if (!isNaN(value)) {
+c = value;
+calculateHousekeepers();
+}
+} else {
+// Clear existing timeout
+if (fullCleansTimeout) {
+clearTimeout(fullCleansTimeout);
+}
+// Set new timeout for 0.5 seconds
+fullCleansTimeout = setTimeout(() => {
+const value = parseFloat(this.value);
+if (!isNaN(value)) {
+c = value;
+calculateHousekeepers();
+}
+}, 500);
+}
+}
+});
+
+fullCleansInput.addEventListener('keypress', function(e) {
+if (e.key === 'Enter' && this.value.length > 0 && tidiesEntered) {
+// Clear timeout and calculate immediately
+if (fullCleansTimeout) {
+clearTimeout(fullCleansTimeout);
+}
+const value = parseFloat(this.value);
+if (!isNaN(value)) {
+c = value;
+calculateHousekeepers();
+}
+}
+});
+</script>
 </body>
 </html>
